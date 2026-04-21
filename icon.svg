@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <rect width="128" height="128" rx="16" fill="#2a2a3a"/>
+  <!-- Grid lines -->
+  <line x1="32" y1="20" x2="32" y2="108" stroke="#5a7fa0" stroke-width="1.5"/>
+  <line x1="64" y1="20" x2="64" y2="108" stroke="#5a7fa0" stroke-width="1.5"/>
+  <line x1="96" y1="20" x2="96" y2="108" stroke="#5a7fa0" stroke-width="1.5"/>
+  <line x1="20" y1="32" x2="108" y2="32" stroke="#5a7fa0" stroke-width="1.5"/>
+  <line x1="20" y1="64" x2="108" y2="64" stroke="#5a7fa0" stroke-width="1.5"/>
+  <line x1="20" y1="96" x2="108" y2="96" stroke="#5a7fa0" stroke-width="1.5"/>
+  <!-- Floor tiles -->
+  <rect x="33" y="65" width="30" height="30" rx="2" fill="#5a5045" opacity="0.9"/>
+  <rect x="65" y="65" width="30" height="30" rx="2" fill="#5a5045" opacity="0.9"/>
+  <rect x="33" y="33" width="30" height="30" rx="2" fill="#5a5045" opacity="0.9"/>
+  <!-- Wall tile -->
+  <rect x="65" y="33" width="30" height="30" rx="2" fill="#7a5a30" opacity="0.95"/>
+  <!-- Torch glow -->
+  <circle cx="96" cy="64" r="6" fill="#ffb020" opacity="0.8"/>
+  <circle cx="96" cy="64" r="3" fill="#ffffff" opacity="0.9"/>
+</svg>

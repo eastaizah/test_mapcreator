@@ -1,0 +1,83 @@
+[gd_scene load_steps=9 format=3 uid="uid://main_scene"]
+
+[ext_resource type="Script" path="res://scripts/GameManager.gd" id="1_gm"]
+[ext_resource type="Script" path="res://scripts/MapRenderer.gd" id="2_mr"]
+[ext_resource type="Script" path="res://scripts/EditorCamera.gd" id="3_ec"]
+[ext_resource type="Script" path="res://scripts/UI.gd" id="4_ui"]
+[ext_resource type="PackedScene" path="res://scenes/player.tscn" id="5_pl"]
+
+[sub_resource type="Environment" id="Environment_1"]
+background_mode = 1
+background_color = Color(0.35, 0.55, 0.8, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.5, 0.5, 0.6, 1)
+ambient_light_energy = 0.5
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
+
+[sub_resource type="Sky" id="Sky_1"]
+sky_material = SubResource("ProceduralSkyMaterial_1")
+
+[node name="GameManager" type="Node3D"]
+script = ExtResource("1_gm")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_1")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, -0.433013, 0.25, 0, 0.5, 0.866025, -0.5, -0.75, 0.433013, 0, 10, 0)
+light_energy = 1.2
+shadow_enabled = true
+
+[node name="MapRenderer" type="Node3D" parent="."]
+script = ExtResource("2_mr")
+
+[node name="EditorCamera" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.5, 0.866025, 0, -0.866025, 0.5, 0, 20, 10)
+current = true
+fov = 60.0
+script = ExtResource("3_ec")
+
+[node name="Player" parent="." instance=ExtResource("5_pl")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+visible = false
+
+[node name="UI" type="CanvasLayer" parent="."]
+script = ExtResource("4_ui")
+
+[node name="ModeButton" type="Button" parent="UI"]
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 200.0
+offset_bottom = 48.0
+text = "▶  Explorar  (T)"
+
+[node name="LayerLabel" type="Label" parent="UI"]
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 8.0
+offset_top = 56.0
+offset_right = 200.0
+offset_bottom = 80.0
+text = "Capa: 0"
+
+[node name="TileSelector" type="HBoxContainer" parent="UI"]
+anchor_left = 0.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -60.0
+offset_bottom = -8.0
+alignment = 1
+
+[node name="InstructionsLabel" type="Label" parent="UI"]
+anchor_left = 0.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -26.0
+offset_bottom = -4.0
+horizontal_alignment = 1
+text = "LMB: Colocar  |  RMB: Borrar  |  Rueda: Zoom  |  Clic Medio: Pan  |  Q/E: Capa"
