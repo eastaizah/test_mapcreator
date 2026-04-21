@@ -1,5 +1,5 @@
 ## UI.gd
-## Interfaz de usuario: selector de tiles y botón de cambio de modo.
+## Interfaz de usuario: panel lateral de tiles (izquierda) y control de capa (derecha).
 
 class_name UI
 extends CanvasLayer
@@ -7,16 +7,21 @@ extends CanvasLayer
 ## Referencia al GameManager.
 var _game_manager: GameManager = null
 
-## Referencia al contenedor del selector de tiles.
-@onready var tile_selector: HBoxContainer = $TileSelector
 @onready var mode_button: Button = $ModeButton
-@onready var layer_label: Label = $LayerLabel
+@onready var tile_panel: PanelContainer = $TilePanel
+@onready var tile_grid: GridContainer = $TilePanel/TileGrid
+@onready var layer_panel: VBoxContainer = $LayerPanel
+@onready var layer_label: Label = $LayerPanel/LayerLabel
+@onready var layer_up_btn: Button = $LayerPanel/LayerUpBtn
+@onready var layer_down_btn: Button = $LayerPanel/LayerDownBtn
 @onready var instructions_label: Label = $InstructionsLabel
 
 
 func setup(registry: TileRegistry, game_manager: GameManager) -> void:
 	_game_manager = game_manager
 	_build_tile_selector(registry)
+	layer_up_btn.pressed.connect(func(): _game_manager.change_layer(1))
+	layer_down_btn.pressed.connect(func(): _game_manager.change_layer(-1))
 
 
 func _ready() -> void:
@@ -24,17 +29,17 @@ func _ready() -> void:
 
 
 func _build_tile_selector(registry: TileRegistry) -> void:
-	# Limpiar botones anteriores.
-	for child in tile_selector.get_children():
+	for child in tile_grid.get_children():
 		child.queue_free()
 
 	for tile in registry.get_all():
 		var btn := Button.new()
 		btn.text = tile.id.replace("_", " ").capitalize()
-		btn.custom_minimum_size = Vector2(100, 40)
-		var tile_id: String = tile.id  # Captura para la lambda.
+		btn.custom_minimum_size = Vector2(95, 80)
+		btn.size_flags_horizontal = Control.SIZE_FILL
+		var tile_id: String = tile.id
 		btn.pressed.connect(func(): _game_manager.select_tile(tile_id))
-		tile_selector.add_child(btn)
+		tile_grid.add_child(btn)
 
 
 func _on_mode_button_pressed() -> void:
@@ -47,13 +52,13 @@ func on_mode_changed(mode: GameManager.GameMode) -> void:
 	match mode:
 		GameManager.GameMode.BUILD:
 			mode_button.text = "▶  Explorar  (T)"
-			tile_selector.visible = true
-			layer_label.visible = true
+			tile_panel.visible = true
+			layer_panel.visible = true
 			instructions_label.text = "LMB: Colocar  |  RMB: Borrar  |  Rueda: Zoom  |  Clic Medio: Pan  |  Q/E: Capa"
 		GameManager.GameMode.EXPLORE:
 			mode_button.text = "🔨  Construir  (T)"
-			tile_selector.visible = false
-			layer_label.visible = false
+			tile_panel.visible = false
+			layer_panel.visible = false
 			instructions_label.text = "WASD: Mover  |  Space: Saltar  |  T: Volver al editor  |  Esc: Liberar ratón"
 
 

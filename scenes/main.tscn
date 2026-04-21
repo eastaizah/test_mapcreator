@@ -50,27 +50,51 @@ anchor_right = 0.0
 anchor_bottom = 0.0
 offset_left = 8.0
 offset_top = 8.0
-offset_right = 200.0
+offset_right = 208.0
 offset_bottom = 48.0
 text = "▶  Explorar  (T)"
 
-[node name="LayerLabel" type="Label" parent="UI"]
-anchor_right = 0.0
-anchor_bottom = 0.0
-offset_left = 8.0
-offset_top = 56.0
-offset_right = 200.0
-offset_bottom = 80.0
-text = "Capa: 0"
-
-[node name="TileSelector" type="HBoxContainer" parent="UI"]
+[node name="TilePanel" type="PanelContainer" parent="UI"]
 anchor_left = 0.0
-anchor_top = 1.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 1.0
+offset_left = 0.0
+offset_top = 56.0
+offset_right = 210.0
+offset_bottom = -36.0
+
+[node name="TileGrid" type="GridContainer" parent="UI/TilePanel"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = -60.0
-offset_bottom = -8.0
+columns = 2
+
+[node name="LayerPanel" type="VBoxContainer" parent="UI"]
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -90.0
+offset_top = -80.0
+offset_right = -8.0
+offset_bottom = 80.0
 alignment = 1
+
+[node name="LayerUpBtn" type="Button" parent="UI/LayerPanel"]
+custom_minimum_size = Vector2(80.0, 36.0)
+size_flags_horizontal = 4
+text = "▲"
+
+[node name="LayerLabel" type="Label" parent="UI/LayerPanel"]
+custom_minimum_size = Vector2(80.0, 28.0)
+size_flags_horizontal = 4
+horizontal_alignment = 1
+text = "Capa: 0"
+
+[node name="LayerDownBtn" type="Button" parent="UI/LayerPanel"]
+custom_minimum_size = Vector2(80.0, 36.0)
+size_flags_horizontal = 4
+text = "▼"
 
 [node name="InstructionsLabel" type="Label" parent="UI"]
 anchor_left = 0.0

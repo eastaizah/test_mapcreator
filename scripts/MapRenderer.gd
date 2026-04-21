@@ -5,7 +5,7 @@
 ## Dimensiones:
 ##   CELL_SIZE = 2.0 unidades  (tamaño total de una celda en X y Z)
 ##   CELL_HEIGHT = 2.0 unidades (altura de una capa)
-##   WALL_THICKNESS = CELL_SIZE / 4.0 = 0.5 unidades
+##   WALL_THICKNESS = CELL_SIZE / 4.0 = 0.5 unidades (mantenido por compatibilidad; las paredes usan CELL_SIZE)
 
 class_name MapRenderer
 extends Node3D
@@ -13,6 +13,8 @@ extends Node3D
 const CELL_SIZE: float = 2.0
 const CELL_HEIGHT: float = 2.0
 const WALL_THICKNESS: float = CELL_SIZE / 4.0
+const GRID_HALF: int = 20
+const NUM_STEPS: int = 4
 
 ## Referencia al MapData que se va a renderizar.
 var map_data: MapData = null
@@ -25,6 +27,9 @@ var _tile_nodes: Dictionary = {}
 
 ## Índice de la capa máxima visible (para ocultamiento de capas superiores).
 var max_visible_layer: int = 0
+
+## MeshInstance3D que muestra la rejilla de edición.
+var _grid_mesh_instance: MeshInstance3D = null
 
 
 func _ready() -> void:
@@ -57,6 +62,7 @@ func rebuild_all() -> void:
 			_spawn_tile(pos, resource)
 
 	_update_layer_visibility()
+	draw_grid(max_visible_layer)
 
 
 ## Responde a cambios individuales de celdas.
@@ -85,6 +91,8 @@ func _spawn_tile(pos: Vector3i, resource: MapTileResource) -> void:
 			_build_decoration(container, resource)
 		MapTileResource.TileType.LIGHT_SOURCE:
 			_build_light_source(container, resource)
+		MapTileResource.TileType.STAIRS:
+			_build_stairs(container, resource)
 
 
 ## Elimina el nodo correspondiente a una posición.
@@ -95,10 +103,21 @@ func _remove_tile_node(pos: Vector3i) -> void:
 
 
 ## Convierte una posición de grilla a posición en el mundo 3D.
+## Las paredes, escaleras y fuentes de luz tienen su base en (layer-1)*CELL_HEIGHT,
+## de modo que al colocarse en la capa 1 arrancan al nivel del suelo (y=0).
+## Las fuentes de luz (antorchas) se colocan normalmente en capa 1 junto a las paredes,
+## por lo que también reciben este ajuste para renderizarse a la altura correcta de la pared.
 func _grid_to_world(pos: Vector3i, tile_type: MapTileResource.TileType) -> Vector3:
 	var x := pos.x * CELL_SIZE
 	var z := pos.z * CELL_SIZE
-	var y := pos.y * CELL_HEIGHT
+	var y: float
+	match tile_type:
+		MapTileResource.TileType.WALL, \
+		MapTileResource.TileType.STAIRS, \
+		MapTileResource.TileType.LIGHT_SOURCE:
+			y = (pos.y - 1) * CELL_HEIGHT
+		_:
+			y = pos.y * CELL_HEIGHT
 	return Vector3(x, y, z)
 
 
@@ -123,8 +142,8 @@ func _build_floor(parent: Node3D, resource: MapTileResource) -> void:
 
 
 func _build_wall(parent: Node3D, resource: MapTileResource) -> void:
-	# La pared ocupa el largo completo de la celda (CELL_SIZE) pero solo
-	# WALL_THICKNESS de ancho, alineada al centro de la celda.
+	# La pared ocupa toda la celda en X y Z (bloque sólido de CELL_SIZE × CELL_SIZE),
+	# con altura CELL_HEIGHT, para que encaje perfectamente con los bordes del suelo.
 	var mesh_instance := MeshInstance3D.new()
 	mesh_instance.name = "WallMesh"
 
@@ -132,15 +151,37 @@ func _build_wall(parent: Node3D, resource: MapTileResource) -> void:
 		mesh_instance.mesh = resource.mesh_override
 	else:
 		var box := BoxMesh.new()
-		box.size = Vector3(CELL_SIZE, CELL_HEIGHT, WALL_THICKNESS)
+		box.size = Vector3(CELL_SIZE, CELL_HEIGHT, CELL_SIZE)
 		mesh_instance.mesh = box
 
-	# Elevar la pared para que su base esté en y=0 del contenedor.
+	# La base de la pared queda en y=0 del contenedor (que ya está ajustado).
 	mesh_instance.position.y = CELL_HEIGHT / 2.0
 
 	_apply_material(mesh_instance, resource)
 	parent.add_child(mesh_instance)
 	_add_static_body(parent, mesh_instance)
+
+
+func _build_stairs(parent: Node3D, resource: MapTileResource) -> void:
+	# Escalera de NUM_STEPS peldaños que asciende en dirección Z dentro de la celda.
+	# Cada peldaño es un BoxMesh más alto que el anterior.
+	var step_z_width: float = CELL_SIZE / NUM_STEPS
+	for i in range(NUM_STEPS):
+		var step_height: float = CELL_HEIGHT * (i + 1.0) / NUM_STEPS
+		var mesh_instance := MeshInstance3D.new()
+		mesh_instance.name = "Step_%d" % i
+
+		var box := BoxMesh.new()
+		box.size = Vector3(CELL_SIZE, step_height, step_z_width)
+		mesh_instance.mesh = box
+
+		# Centro del peldaño en Y y en Z dentro del contenedor.
+		mesh_instance.position.y = step_height / 2.0
+		mesh_instance.position.z = (i + 0.5) * step_z_width - CELL_SIZE / 2.0
+
+		_apply_material(mesh_instance, resource)
+		parent.add_child(mesh_instance)
+		_add_static_body(parent, mesh_instance)
 
 
 func _build_decoration(parent: Node3D, resource: MapTileResource) -> void:
@@ -203,6 +244,8 @@ func _apply_material(mesh_instance: MeshInstance3D, resource: MapTileResource) -
 				mat.albedo_color = Color(0.55, 0.50, 0.45)  # Gris piedra
 			MapTileResource.TileType.WALL:
 				mat.albedo_color = Color(0.60, 0.45, 0.30)  # Marrón madera
+			MapTileResource.TileType.STAIRS:
+				mat.albedo_color = Color(0.52, 0.47, 0.42)  # Piedra escalera
 			_:
 				mat.albedo_color = Color(0.8, 0.8, 0.8)
 
@@ -237,7 +280,46 @@ func _update_layer_visibility() -> void:
 		node.visible = (pos.y <= max_visible_layer)
 
 
-## Cambia la capa máxima visible (para facilitar edición de interiores).
+## Cambia la capa máxima visible y redibuja la rejilla.
 func set_max_visible_layer(layer: int) -> void:
 	max_visible_layer = layer
 	_update_layer_visibility()
+	draw_grid(layer)
+
+
+## Dibuja (o redibuja) la rejilla de edición a la altura de la capa dada.
+func draw_grid(layer: int) -> void:
+	if _grid_mesh_instance != null:
+		_grid_mesh_instance.queue_free()
+		_grid_mesh_instance = null
+
+	# La rejilla se sitúa ligeramente por encima del plano de edición.
+	var grid_y: float = layer * CELL_HEIGHT + 0.08
+
+	var imesh := ImmediateMesh.new()
+	imesh.surface_begin(Mesh.PRIMITIVE_LINES)
+	for i in range(-GRID_HALF, GRID_HALF + 1):
+		# Líneas paralelas al eje Z.
+		imesh.surface_add_vertex(Vector3(i * CELL_SIZE, grid_y, -GRID_HALF * CELL_SIZE))
+		imesh.surface_add_vertex(Vector3(i * CELL_SIZE, grid_y,  GRID_HALF * CELL_SIZE))
+		# Líneas paralelas al eje X.
+		imesh.surface_add_vertex(Vector3(-GRID_HALF * CELL_SIZE, grid_y, i * CELL_SIZE))
+		imesh.surface_add_vertex(Vector3( GRID_HALF * CELL_SIZE, grid_y, i * CELL_SIZE))
+	imesh.surface_end()
+
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(1.0, 1.0, 1.0, 0.35)
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+
+	_grid_mesh_instance = MeshInstance3D.new()
+	_grid_mesh_instance.name = "GridOverlay"
+	_grid_mesh_instance.mesh = imesh
+	_grid_mesh_instance.material_override = mat
+	add_child(_grid_mesh_instance)
+
+
+## Muestra u oculta la rejilla de edición.
+func set_grid_visible(vis: bool) -> void:
+	if _grid_mesh_instance != null:
+		_grid_mesh_instance.visible = vis

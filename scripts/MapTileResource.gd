@@ -9,7 +9,8 @@ enum TileType {
 	FLOOR,
 	WALL,
 	DECORATION,
-	LIGHT_SOURCE
+	LIGHT_SOURCE,
+	STAIRS
 }
 
 @export var id: String = ""
@@ -44,4 +45,11 @@ static func create_torch() -> MapTileResource:
 	var res := MapTileResource.new("torch", TileType.LIGHT_SOURCE)
 	res.is_emissive = true
 	res.light_energy = 2.0
+	return res
+
+
+## Crea un recurso de escalera.
+static func create_stairs() -> MapTileResource:
+	var res := MapTileResource.new("stairs", TileType.STAIRS)
+	res.is_emissive = false
 	return res
