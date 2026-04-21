@@ -6,6 +6,7 @@
 class_name EditorCamera
 extends Camera3D
 
+const INT32_MAX: int = 2147483647
 const PAN_SPEED: float = 0.05
 const ZOOM_SPEED: float = 1.5
 const ZOOM_MIN: float = 2.0
@@ -93,7 +94,7 @@ func _mouse_to_grid(mouse_pos: Vector2) -> Vector3i:
 
 	# Intersección con el plano de edición (altura de la capa actual).
 	var layer_plane := Plane(Vector3.UP, current_layer * MapRenderer.CELL_HEIGHT)
-	var intersection := layer_plane.intersects_ray(ray_origin, ray_dir)
+	var intersection: Variant = layer_plane.intersects_ray(ray_origin, ray_dir)
 
 	if intersection == null:
 		return Vector3i(INT32_MAX, INT32_MAX, INT32_MAX)

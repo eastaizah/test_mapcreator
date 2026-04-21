@@ -32,7 +32,7 @@ func _build_tile_selector(registry: TileRegistry) -> void:
 		var btn := Button.new()
 		btn.text = tile.id.replace("_", " ").capitalize()
 		btn.custom_minimum_size = Vector2(100, 40)
-		var tile_id := tile.id  # Captura para la lambda.
+		var tile_id: String = tile.id  # Captura para la lambda.
 		btn.pressed.connect(func(): _game_manager.select_tile(tile_id))
 		tile_selector.add_child(btn)
 
