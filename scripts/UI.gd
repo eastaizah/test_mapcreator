@@ -20,8 +20,8 @@ var _game_manager: GameManager = null
 func setup(registry: TileRegistry, game_manager: GameManager) -> void:
 	_game_manager = game_manager
 	_build_tile_selector(registry)
-	layer_up_btn.pressed.connect(func(): _game_manager._change_layer(1))
-	layer_down_btn.pressed.connect(func(): _game_manager._change_layer(-1))
+	layer_up_btn.pressed.connect(func(): _game_manager.change_layer(1))
+	layer_down_btn.pressed.connect(func(): _game_manager.change_layer(-1))
 
 
 func _ready() -> void:

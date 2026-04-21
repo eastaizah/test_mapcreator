@@ -53,9 +53,9 @@ func _input(event: InputEvent) -> void:
 
 	if current_mode == GameMode.BUILD:
 		if event.is_action_pressed("layer_up"):
-			_change_layer(1)
+			change_layer(1)
 		elif event.is_action_pressed("layer_down"):
-			_change_layer(-1)
+			change_layer(-1)
 
 
 func _toggle_mode() -> void:
@@ -66,7 +66,7 @@ func _toggle_mode() -> void:
 
 
 ## Mueve la capa activa en delta pasos y actualiza el renderizador y la UI.
-func _change_layer(delta: int) -> void:
+func change_layer(delta: int) -> void:
 	editor_camera.current_layer += delta
 	map_renderer.set_max_visible_layer(editor_camera.current_layer)
 	_update_layer_label()

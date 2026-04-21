@@ -5,7 +5,7 @@
 ## Dimensiones:
 ##   CELL_SIZE = 2.0 unidades  (tamaño total de una celda en X y Z)
 ##   CELL_HEIGHT = 2.0 unidades (altura de una capa)
-##   WALL_THICKNESS = CELL_SIZE / 4.0 = 0.5 unidades (reservado para referencias externas)
+##   WALL_THICKNESS = CELL_SIZE / 4.0 = 0.5 unidades (mantenido por compatibilidad; las paredes usan CELL_SIZE)
 
 class_name MapRenderer
 extends Node3D
@@ -105,6 +105,8 @@ func _remove_tile_node(pos: Vector3i) -> void:
 ## Convierte una posición de grilla a posición en el mundo 3D.
 ## Las paredes, escaleras y fuentes de luz tienen su base en (layer-1)*CELL_HEIGHT,
 ## de modo que al colocarse en la capa 1 arrancan al nivel del suelo (y=0).
+## Las fuentes de luz (antorchas) se colocan normalmente en capa 1 junto a las paredes,
+## por lo que también reciben este ajuste para renderizarse a la altura correcta de la pared.
 func _grid_to_world(pos: Vector3i, tile_type: MapTileResource.TileType) -> Vector3:
 	var x := pos.x * CELL_SIZE
 	var z := pos.z * CELL_SIZE
