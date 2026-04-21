@@ -48,15 +48,15 @@ func _ready() -> void:
 
 
 func _input(event: InputEvent) -> void:
-	if event.is_action_just_pressed("toggle_mode"):
+	if event.is_action_pressed("toggle_mode"):
 		_toggle_mode()
 
 	if current_mode == GameMode.BUILD:
-		if event.is_action_just_pressed("layer_up"):
+		if event.is_action_pressed("layer_up"):
 			editor_camera.current_layer += 1
 			map_renderer.set_max_visible_layer(editor_camera.current_layer)
 			_update_layer_label()
-		elif event.is_action_just_pressed("layer_down"):
+		elif event.is_action_pressed("layer_down"):
 			editor_camera.current_layer -= 1
 			map_renderer.set_max_visible_layer(editor_camera.current_layer)
 			_update_layer_label()
