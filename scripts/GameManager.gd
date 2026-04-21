@@ -53,13 +53,9 @@ func _input(event: InputEvent) -> void:
 
 	if current_mode == GameMode.BUILD:
 		if event.is_action_pressed("layer_up"):
-			editor_camera.current_layer += 1
-			map_renderer.set_max_visible_layer(editor_camera.current_layer)
-			_update_layer_label()
+			_change_layer(1)
 		elif event.is_action_pressed("layer_down"):
-			editor_camera.current_layer -= 1
-			map_renderer.set_max_visible_layer(editor_camera.current_layer)
-			_update_layer_label()
+			_change_layer(-1)
 
 
 func _toggle_mode() -> void:
@@ -67,6 +63,13 @@ func _toggle_mode() -> void:
 		_set_mode(GameMode.EXPLORE)
 	else:
 		_set_mode(GameMode.BUILD)
+
+
+## Mueve la capa activa en delta pasos y actualiza el renderizador y la UI.
+func _change_layer(delta: int) -> void:
+	editor_camera.current_layer += delta
+	map_renderer.set_max_visible_layer(editor_camera.current_layer)
+	_update_layer_label()
 
 
 func _set_mode(mode: GameMode) -> void:
@@ -78,12 +81,14 @@ func _set_mode(mode: GameMode) -> void:
 			editor_camera.current = true
 			player.deactivate()
 			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+			map_renderer.set_grid_visible(true)
 
 		GameMode.EXPLORE:
 			editor_camera.visible = false
 			# Colocar al jugador en la posición inicial del mapa.
 			player.global_position = _find_spawn_position()
 			player.activate()
+			map_renderer.set_grid_visible(false)
 
 	if ui.has_method("on_mode_changed"):
 		ui.on_mode_changed(mode)
@@ -126,13 +131,14 @@ func _populate_demo_map() -> void:
 	var floor_tile := tile_registry.get_tile("stone_floor")
 	var wall_tile := tile_registry.get_tile("wood_wall")
 	var torch_tile := tile_registry.get_tile("torch")
+	var stairs_tile := tile_registry.get_tile("stairs")
 
 	# Suelo 5x5 en la capa 0.
 	for x in range(-2, 3):
 		for z in range(-2, 3):
 			map_data.set_tile(Vector3i(x, 0, z), floor_tile)
 
-	# Paredes en el perímetro.
+	# Paredes en el perímetro (capa 1 → base en y=0 gracias al ajuste de Y).
 	for i in range(-2, 3):
 		map_data.set_tile(Vector3i(i, 1, -2), wall_tile)
 		map_data.set_tile(Vector3i(i, 1,  2), wall_tile)
@@ -144,3 +150,6 @@ func _populate_demo_map() -> void:
 	map_data.set_tile(Vector3i( 2, 1, -2), torch_tile)
 	map_data.set_tile(Vector3i(-2, 1,  2), torch_tile)
 	map_data.set_tile(Vector3i( 2, 1,  2), torch_tile)
+
+	# Escalera de demostración en el interior de la sala (asciende hacia +Z).
+	map_data.set_tile(Vector3i(0, 1, 1), stairs_tile)

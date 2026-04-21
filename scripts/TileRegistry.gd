@@ -20,6 +20,7 @@ func _register_defaults() -> void:
 	register(MapTileResource.create_stone_floor())
 	register(MapTileResource.create_wood_wall())
 	register(MapTileResource.create_torch())
+	register(MapTileResource.create_stairs())
 
 
 ## Registra un nuevo tile en el registro.
